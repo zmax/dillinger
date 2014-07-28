@@ -27,6 +27,7 @@ $(function() {
       , editors: {
         'markdown-gfm': { type: 'markdown-gfm', name: 'Github Markdown', fileExts: ['.md', '.markdown', '.mdown'] }
       , 'markdown': { type: 'markdown', name: 'Markdown', fileExts: ['.md', '.markdown', '.mdown'] }
+      , 'html': { type: 'html', name: 'HTML', fileExts: ['.html', '.htm'] }
       }
     }
 
@@ -358,46 +359,61 @@ $(function() {
 
   } // end initAce
 
-  function initShareJS() {
-      // Grab the docid from the URL and connect to ShareJS
-      var path = document.location.pathname;
-      var m = path.match(/doc\/(\w+)/);
-      if (m.length == 2) {
-          docid = m[1];
-      } else {
-          console.warn("Crazy url has no identifiable docid: ", path);
-          return;
-      }
-
-      var btn = $('#collaborate-btn');
-
+  function toggleShareJS(callback) {
       // Prevent clients from making edits that will be destroyed
       editor.setReadOnly(true);
 
-      // Make the red loading peace sign ☮ :)
-      // FIXME: This should be done in proper CSS.
-      btn.button('loading');
-      $('#loading-icon').css({
-          fontSize: '130%',
-          verticalAlign: 'center',
-          color: 'red',
-      });
+      if (!ShareJS.doc) {
 
+        // Grab the docid from the URL and connect to ShareJS
+        var path = document.location.pathname;
+        var m = path.match(/doc\/(\w+)/);
+        if (m.length == 2) {
+            docid = m[1];
+        } else {
+            console.warn("Crazy url has no identifiable docid: ", path);
+            editor.setReadOnly(true);
+            return;
+        }
+        ShareJS.open(docid, callback);
+      } else {
+        ShareJS.close(callback);
+      }
+  }
 
-      ShareJS.open(docid, function () {
-        // Change back to normal from loading state
-        btn.button('reset');
+  function initShareJS() {
 
-        // Wire up the button with sharing instructions
-        btn.click(function () {
-            alert("This should be a pretty modal that says to share the url");
+    var btn = $('#collaborate-btn');
+
+    function toggleHeart() {
+      console.log("Toggling!")
+      // Change back to normal from loading state
+      // This call also resets 'icon-white' below, so we
+      // have to test to determine what to do with it.
+      btn.button('reset')
+
+      if (ShareJS.doc) {
+        // Toggle color
+        $('#collaborate-icon').addClass('icon-white');
+      }
+      // Ready to go, allow editing again
+      editor.setReadOnly(false);
+    }
+
+    // Wire up the button with sharing instructions
+    btn.click(function() {
+        btn.button('loading');
+        // Make the red loading peace sign ☮ :)
+        // FIXME: This should be done in proper CSS.
+        $('#loading-icon').css({
+            fontSize: '130%',
+            verticalAlign: 'center',
+            color: 'red',
         });
+        toggleShareJS(toggleHeart);
+    });
 
-        // Ready to go, allow editing again
-        editor.setReadOnly(false);
-      });
-
-      $(window).on('unload', ShareJS.close);
+    $(window).on('unload', ShareJS.close);
   }
 
   function initEditorType() {
@@ -417,12 +433,15 @@ $(function() {
         gfm: (editorType().type === "markdown-gfm" ? true : false)
       , tables: true
       , pedantic: false
-      , sanitize: true
+      , sanitize: false
       , smartLists: true
       , smartypants: false
       , langPrefix: 'lang-'
-      , highlight: function (code) {
-          return hljs.highlightAuto(code).value;
+      , highlight: function (code, lang, etc) {
+          if (hljs.getLanguage(lang)) {
+            code = hljs.highlight(lang, code).value;
+          }
+          return code;
         }
       })
       converter = marked
@@ -709,7 +728,7 @@ $(function() {
    *
    * @return {Void}
    */
-  function fetchHtmlFile() {
+  function fetchHtmlFile( formatting ) {
 
     var unmd = editor.getSession().getValue()
 
@@ -725,7 +744,7 @@ $(function() {
 
     var config = {
       type: 'POST'
-    , data: 'name=' + encodeURIComponent(getCurrentFilenameFromField()) + "&unmd=" + encodeURIComponent(unmd)
+    , data: 'name=' + encodeURIComponent(getCurrentFilenameFromField()) + "&unmd=" + encodeURIComponent(unmd) + ( ( formatting ) ? "&formatting=true" : "" )
     , dataType: 'json'
     , url: '/factory/fetch_html'
     , error: _failHandler
@@ -854,8 +873,7 @@ $(function() {
     var prefContent =  '<div>'
                           +'<ul>'
                             +'<li><a href="#" id="paper">Toggle Paper</a></li>'
-                            +'<li><a href="#" id="html-editing">Toggle HTML Editing</a></li>'
-                            +'<li><a href="#" id="reset">Reset Profile</a></li>'
+                            +'<li><a href="#" id="reset_pref">Reset Profile</a></li>'
                           +'</ul>'
                         +'</div>'
 
@@ -885,18 +903,6 @@ $(function() {
 
     Notifier.showMessage(Notifier.messages.profileUpdated)
 
-  }
-
-  function toggleHTML() {
-    if (profile.editors && profile.editors.html) {
-      delete profile.editors.html
-    }
-    else {
-      profile.editors.html = { type: 'html', name: 'HTML', fileExts: ['.html', '.htm'] }
-    }
-    Notifier.showMessage((profile.editors.html ? "Enabled" : "Disabled") + " HTML Editing")
-    $('#editor-dropdown li').remove()
-    initEditorType()
   }
 
   /**
@@ -1035,11 +1041,13 @@ $(function() {
         togglePaper()
         return false
       })
-      .on('click', '#html-editing', function() {
-        toggleHTML();
+      .on('click', '#reset_pref', function() {
+        resetProfile();
         return false;
       })
-      .on('click', '#reset', function() {
+
+    $("#reset")
+      .on('click', function() {
         resetProfile();
         return false;
       })
@@ -1084,6 +1092,13 @@ $(function() {
     $('#export_html')
       .on('click', function() {
         fetchHtmlFile()
+        $('.dropdown').removeClass('open')
+        return false
+      })
+
+    $('#export_html_formatted')
+      .on('click', function() {
+        fetchHtmlFile( true )
         $('.dropdown').removeClass('open')
         return false
       })
@@ -1141,7 +1156,7 @@ $(function() {
         return false;
       })
 
-    $('#editor-dropdown')// > li > a')
+    $('#editor-dropdown')
       .on('click', 'li > a', function() {
         var pickEditor = $(this).attr("data-value")
         if (!profile.editors[pickEditor]) {
@@ -1896,10 +1911,13 @@ $(function() {
         // Save a reference to the document at ShareJS.doc
         self.doc = doc;
 
-        // If an empty document is found, insert the default text,
-        // otherwise leave the contents alone when attaching
-        var unmd = profile.currentMd || editor.getSession().getValue()
-        if (!doc.getText()) {
+        // If an empty document is found, insert the current text,
+        // otherwise overwrite the current text with the document
+        var unmd = profile.currentFile || editor.getSession().getValue()
+        var docText = doc.getText();
+        if (docText) {
+            editor.getSession().setValue(docText);
+        } else {
             doc.insert(0, unmd);
         }
 
@@ -1920,10 +1938,13 @@ $(function() {
     *
     * @return {Void}
     */
-    close: function (doc) {
-      console.log(doc);
-      doc.detach_ace();
-      this.doc = null;
+    close: function(callback) {
+      doc = this.doc;
+      if (doc) {
+          doc.detach_ace();
+          doc.close(callback);
+          this.doc = null;
+      }
     }
   };
 
