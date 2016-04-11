@@ -33,7 +33,7 @@
   display: block;
   position: absolute;
   right: .5rem;
-  top: .5rem;
+  top: .313rem;
   display: none;
 
   @include from('tablet') {
@@ -99,11 +99,6 @@
     width: 100%;
     z-index: 12;
     pointer-events: none;
-  }
-
-  &:after {
-    background-image: linear-gradient(-180deg, rgba(255,255,255,0) 0%, #FFFFFF 100%);
-    bottom: 0;
   }
 
   // &:before {

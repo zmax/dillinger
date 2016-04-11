@@ -24,6 +24,7 @@
   require('./components/preview.directive');
 
   require('./components/wtfisdillinger-modal.controller');
+  require('./services/debounce.service');
 
   // User
   require('./user/user.controller');
@@ -32,7 +33,6 @@
   // Documents
   require('./factorys/sheet.factory');
   require('./services/documents.service');
-  require('./services/documents.export.service');
   require('./documents/documents-export.controller');
   require('./documents/documents.controller');
   require('./services/wordscount.service');
@@ -75,7 +75,8 @@
     'plugins.dropbox',
     'plugins.googledrive',
     'plugins.onedrive',
-    'ui.bootstrap'
+    'ui.bootstrap',
+    'diDebounce.service'
   ]);
 
   // Run!

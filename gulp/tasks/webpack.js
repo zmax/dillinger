@@ -24,8 +24,13 @@ gulp.task('webpack:dev', function(cb) {
   devCompiler = webpack(webpackDevConfig);
 
   return new webpackDevServer(devCompiler, {
-    contentBase: 'http://localhost:8080/',
-    publicPath:  'http://localhost:8090/assets/',
+    proxy: {
+      '*': {
+        target: 'http://localhost:8080',
+        secure: false,
+      },
+    },
+    publicPath:  'http://localhost:8090/js/',
     hot:         false,
     stats: {
       colors: true
@@ -41,7 +46,6 @@ gulp.task('webpack:dev', function(cb) {
 });
 
 gulp.task('webpack:build', function(cb) {
-
 
   var webpackProductionConfig = Object.create(webpackConfig);
 

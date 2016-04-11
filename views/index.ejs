@@ -39,14 +39,20 @@
   <meta name="MobileOptimized" content="320">
   <meta http-equiv="cleartype" content="on">
 
-  <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700' rel='stylesheet' type='text/css'>
-  <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href="/css/app.css" rel="stylesheet">
+
+
 
 </head>
 <body ng-controller="Base">
 
-  <iframe id="downloader" class="hide"></iframe>
+  <form method="POST" id="downloader">
+    <input type="hidden" name="name">
+    <input type="hidden" name="unmd">
+    <input type="hidden" name="formatting">
+  </form>
 
   <%- include splashscreen %>
 
@@ -60,6 +66,7 @@
       <%- include overlay %>
       <%- include title %>
       <div class="g mnone">
+        <%- include editor-headers %>
         <%- include editor %>
         <%- include preview %>
       </div>

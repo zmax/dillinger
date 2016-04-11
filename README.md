@@ -6,7 +6,7 @@ Dillinger is a cloud-enabled, mobile-ready, offline-storage, AngularJS powered H
   - See HTML in the right
   - Magic
 
-Markdown is a lightweight markup language based on the formatting conventions that people naturally use in email.  As [John Gruber] writes on the [Markdown site] [1]:
+Markdown is a lightweight markup language based on the formatting conventions that people naturally use in email.  As [John Gruber] writes on the [Markdown site][df1]
 
 > The overriding design goal for Markdown's
 > formatting syntax is to make it as readable
@@ -19,7 +19,7 @@ Markdown is a lightweight markup language based on the formatting conventions th
 This text you see here is *actually* written in Markdown! To get a feel for Markdown's syntax, type some text into the left window and watch the results in the right.
 
 ### Version
-3.0.2
+3.2.7
 
 ### Tech
 
@@ -27,13 +27,16 @@ Dillinger uses a number of open source projects to work properly:
 
 * [AngularJS] - HTML enhanced for web apps!
 * [Ace Editor] - awesome web-based text editor
-* [Marked] - a super fast port of Markdown to JavaScript
+* [markdown-it] - Markdown parser done right. Fast and easy to extend.
 * [Twitter Bootstrap] - great UI boilerplate for modern web apps
 * [node.js] - evented I/O for the backend
 * [Express] - fast node.js network app framework [@tjholowaychuk]
 * [Gulp] - the streaming build system
 * [keymaster.js] - awesome keyboard handler lib by [@thomasfuchs]
 * [jQuery] - duh
+
+And of course Dillinger itself is open source with a [public repository][dill]
+ on GitHub.
 
 ### Installation
 
@@ -47,7 +50,6 @@ $ npm i -g gulp
 $ git clone [git-repo-url] dillinger
 $ cd dillinger
 $ npm i -d
-$ mkdir -p public/files/{md,html,pdf}
 $ gulp build --prod
 $ NODE_ENV=production node app
 ```
@@ -63,10 +65,10 @@ Dillinger is currently extended with the following plugins
 
 Readmes, how to use them in your own application can be found here:
 
-* [plugins/dropbox/README.md](https://github.com/joemccann/dillinger/tree/master/plugins/dropbox/README.md)
-* [plugins/github/README.md](https://github.com/joemccann/dillinger/tree/master/plugins/github/README.md)
-* [plugins/googledrive/README.md](https://github.com/joemccann/dillinger/tree/master/plugins/googledrive/README.md)
-* [plugins/onedrive/README.md](https://github.com/joemccann/dillinger/tree/master/plugins/onedrive/README.md)
+* [plugins/dropbox/README.md] [PlDb]
+* [plugins/github/README.md] [PlGh]
+* [plugins/googledrive/README.md] [PlGd]
+* [plugins/onedrive/README.md] [PlOd]
 
 ### Development
 
@@ -92,7 +94,32 @@ $ gulp watch
 $ karma start
 ```
 
-### Todo's
+### Docker
+Dillinger is very easy to install and deploy in a Docker container.
+
+By default, the Docker will expose port 80, so change this within the Dockerfile if necessary. When ready, simply use the Dockerfile to build the image. 
+
+```sh
+cd dillinger
+docker build -t <youruser>/dillinger:latest .
+```
+This will create the dillinger image and pull in the necessary dependencies. Once done, run the Docker and map the port to whatever you wish on your host. In this example, we simply map port 80 of the host to port 80 of the Docker (or whatever port was exposed in the Dockerfile):
+
+```sh
+docker run -d -p 80:80 --restart="always" <youruser>/dillinger:latest
+```
+
+Verify the deployment by navigating to your server address in your preferred browser.
+
+### N|Solid and NGINX
+
+More details coming soon.
+
+#### docker-compose.yml
+
+Change the path for the nginx conf mounting path to your full path, not mine!
+
+### Todos
 
  - Write Tests
  - Rethink Github Save
@@ -107,16 +134,27 @@ MIT
 
 **Free Software, Hell Yeah!**
 
-[john gruber]:http://daringfireball.net/
-[@thomasfuchs]:http://twitter.com/thomasfuchs
-[1]:http://daringfireball.net/projects/markdown/
-[marked]:https://github.com/chjj/marked
-[Ace Editor]:http://ace.ajax.org
-[node.js]:http://nodejs.org
-[Twitter Bootstrap]:http://twitter.github.com/bootstrap/
-[keymaster.js]:https://github.com/madrobby/keymaster
-[jQuery]:http://jquery.com
-[@tjholowaychuk]:http://twitter.com/tjholowaychuk
-[express]:http://expressjs.com
-[AngularJS]:http://angularjs.org
-[Gulp]:http://gulpjs.com
+[//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
+
+
+   [dill]: <https://github.com/joemccann/dillinger>
+   [git-repo-url]: <https://github.com/joemccann/dillinger.git>
+   [john gruber]: <http://daringfireball.net>
+   [@thomasfuchs]: <http://twitter.com/thomasfuchs>
+   [df1]: <http://daringfireball.net/projects/markdown/>
+   [markdown-it]: <https://github.com/markdown-it/markdown-it>
+   [Ace Editor]: <http://ace.ajax.org>
+   [node.js]: <http://nodejs.org>
+   [Twitter Bootstrap]: <http://twitter.github.com/bootstrap/>
+   [keymaster.js]: <https://github.com/madrobby/keymaster>
+   [jQuery]: <http://jquery.com>
+   [@tjholowaychuk]: <http://twitter.com/tjholowaychuk>
+   [express]: <http://expressjs.com>
+   [AngularJS]: <http://angularjs.org>
+   [Gulp]: <http://gulpjs.com>
+
+   [PlDb]: <https://github.com/joemccann/dillinger/tree/master/plugins/dropbox/README.md>
+   [PlGh]:  <https://github.com/joemccann/dillinger/tree/master/plugins/github/README.md>
+   [PlGd]: <https://github.com/joemccann/dillinger/tree/master/plugins/googledrive/README.md>
+   [PlOd]: <https://github.com/joemccann/dillinger/tree/master/plugins/onedrive/README.md>
+

@@ -1,37 +1,24 @@
 
 'use strict';
 
-var
-  marked = require('marked'),
-  hljs = require('highlight.js');
-
-marked.setOptions({
-  gfm: true,
-  tables: true,
-  pedantic: false,
-  sanitize: true,
-  smartLists: true,
-  smartypants: false,
-  langPrefix: 'lang-',
-  highlight: function(code) {
-    return hljs.highlightAuto(code).value;
-  }
-});
+var md = require( 'md' ).md;
 
 module.exports =
   angular
   .module('diBase.directives.preview', [])
-  .directive('preview', function($rootScope) {
+  .directive('preview', function($rootScope, debounce) {
 
   var directive = {
     link: function(scope, el, attrs) {
 
+      var delay = attrs.debounce || 200;
+
       var refreshPreview = function(val) {
-        el.html(marked($rootScope.editor.getSession().getValue()));
+        el.html(md.render($rootScope.editor.getSession().getValue()));
         return $rootScope.$emit('preview.updated');
       };
 
-      $rootScope.editor.on('change', refreshPreview);
+      $rootScope.editor.on('change', debounce(refreshPreview, delay));
 
       return refreshPreview();
     }
